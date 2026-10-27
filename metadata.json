@@ -1,0 +1,6 @@
+{
+  "name": "Gen AI Club NIAT SANSKIRITI",
+  "description": "Official portal for the Gen AI Club of NIAT Sanskriti - Join projects, explore cutting-edge AI research, and connect with fellow students and leadership.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
