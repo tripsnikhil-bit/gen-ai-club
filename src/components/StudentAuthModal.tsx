@@ -7,13 +7,14 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { X, Lock, Mail, AlertCircle, Clock, XCircle, ArrowRight, CheckCircle2, Database, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { X, Lock, Mail, AlertCircle, Clock, XCircle, ArrowRight, CheckCircle2, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 interface StudentAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenJoin: () => void;
   onSuccess: () => void;
+  onOpenAdminAuth?: () => void;
 }
 
 export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
@@ -21,9 +22,10 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
   onClose,
   onOpenJoin,
   onSuccess,
+  onOpenAdminAuth,
 }) => {
   const toast = useToast();
-  const { isApprovedMember, joinRequest, refreshAuthStatus, user, logout, isSupabaseConnected } = useAuth();
+  const { isApprovedMember, joinRequest, refreshAuthStatus, user, logout } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'forgot' | 'status-gate'>('login');
   const [email, setEmail] = useState('');
@@ -130,14 +132,6 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
         >
           <X className="w-4 h-4" />
         </button>
-
-        {/* Supabase status indicator if keys not in env yet */}
-        {!isSupabaseConnected && (
-          <div className="mb-4 p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-2">
-            <Database className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>Supabase project URL & key can be configured in <code>.env</code>.</span>
-          </div>
-        )}
 
         {/* MODE: STATUS GATE */}
         {mode === 'status-gate' && user ? (
@@ -379,7 +373,7 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
               </button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-white/[0.08] text-center">
+            <div className="mt-6 pt-5 border-t border-white/[0.08] text-center space-y-2">
               <p className="text-xs text-zinc-400">
                 Not a member yet?{' '}
                 <button
@@ -392,6 +386,20 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
                   Submit application
                 </button>
               </p>
+              {onOpenAdminAuth && (
+                <p className="text-[11px] text-zinc-500">
+                  Club Executive or President?{' '}
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenAdminAuth();
+                    }}
+                    className="font-medium text-zinc-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer"
+                  >
+                    Executive / Admin Login →
+                  </button>
+                </p>
+              )}
             </div>
           </div>
         )}

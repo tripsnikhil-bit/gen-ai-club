@@ -4,17 +4,18 @@
  */
 
 import React from 'react';
-import { Sparkles, Github, Linkedin, Instagram, Mail, Info } from 'lucide-react';
+import { Sparkles, Github, Linkedin, Instagram, Mail, Shield } from 'lucide-react';
 import { ClubSettings } from '../types';
 
 interface FooterProps {
   settings?: ClubSettings | null;
-  onOpenSetupGuide: () => void;
+  onOpenSetupGuide?: () => void;
+  onOpenAdminAuth: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   settings,
-  onOpenSetupGuide,
+  onOpenAdminAuth,
 }) => {
   const clubName = settings?.clubName || 'GEN AI CLUB';
   const collegeName = settings?.collegeName || 'NIAT SANSKRITI';
@@ -127,13 +128,13 @@ export const Footer: React.FC<FooterProps> = ({
               <li className="text-zinc-400">
                 Room 402, Technology Block
               </li>
-              <li>
+              <li className="pt-1">
                 <button
-                  onClick={onOpenSetupGuide}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-300 hover:text-white bg-white/[0.04] border border-white/10 hover:border-white/20 px-2.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer mt-1"
+                  onClick={onOpenAdminAuth}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-mono text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400/50 px-2.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer"
                 >
-                  <Info className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Setup Guide & Status</span>
+                  <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Admin Portal</span>
                 </button>
               </li>
             </ul>

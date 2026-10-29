@@ -176,8 +176,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <div className="flex items-center gap-2">
               <button
+                onClick={onOpenAdminAuth}
+                title="Club Leadership & Executive Portal"
+                className="px-2.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-cyan-300 hover:bg-white/[0.04] rounded-lg transition-all duration-200 whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Admin Login</span>
+              </button>
+
+              <button
                 onClick={onOpenStudentAuth}
-                className="px-3.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.04] rounded-lg transition-all duration-200 whitespace-nowrap shrink-0 cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.04] rounded-lg transition-all duration-200 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 Student Login
               </button>
@@ -195,6 +204,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile menu button */}
         <div className="flex lg:hidden items-center gap-2">
+          {!user && (
+            <button
+              onClick={onOpenAdminAuth}
+              className="p-1.5 text-zinc-400 hover:text-cyan-300 rounded-lg hover:bg-white/[0.05] cursor-pointer"
+              title="Admin Login"
+            >
+              <Shield className="w-4 h-4 text-cyan-400" />
+            </button>
+          )}
           {!user && (
             <button
               onClick={onOpenJoin}
@@ -293,10 +311,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={() => {
+                    onOpenAdminAuth();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 text-xs font-medium text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-lg border border-cyan-500/30 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Admin / Executive Login</span>
+                </button>
+                <button
+                  onClick={() => {
                     onOpenStudentAuth();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full py-2.5 text-xs font-medium text-zinc-300 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg border border-white/10"
+                  className="w-full py-2.5 text-xs font-medium text-zinc-300 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg border border-white/10 cursor-pointer"
                 >
                   Student Login
                 </button>
@@ -305,7 +333,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onOpenJoin();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full py-2.5 text-xs font-medium text-white linear-btn-glow rounded-lg"
+                  className="w-full py-2.5 text-xs font-medium text-white linear-btn-glow rounded-lg cursor-pointer"
                 >
                   Join Chapter
                 </button>

@@ -169,6 +169,7 @@ function AppContent() {
         <Footer
           settings={settings}
           onOpenSetupGuide={() => setSetupGuideOpen(true)}
+          onOpenAdminAuth={() => setAdminAuthOpen(true)}
         />
       )}
 
@@ -193,6 +194,7 @@ function AppContent() {
           setStudentAuthOpen(false);
           setCurrentView('student-dashboard');
         }}
+        onOpenAdminAuth={() => setAdminAuthOpen(true)}
       />
 
       <AdminAuthModal

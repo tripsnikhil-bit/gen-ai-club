@@ -120,7 +120,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <Users className="w-4 h-4 text-zinc-400 group-hover:text-cyan-400 transition-colors duration-300" />
                 <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">Talent Pool</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white font-mono tabular-nums tracking-tight">120+</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white font-mono tabular-nums tracking-tight">0</div>
               <div className="text-xs text-zinc-500 mt-1">Student researchers</div>
             </div>
 
@@ -129,7 +129,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <Brain className="w-4 h-4 text-zinc-400 group-hover:text-cyan-400 transition-colors duration-300" />
                 <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">AI Projects</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-white font-mono tabular-nums tracking-tight">15+</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white font-mono tabular-nums tracking-tight">0</div>
               <div className="text-xs text-zinc-500 mt-1">Open-source systems</div>
             </div>
 
