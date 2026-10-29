@@ -35,15 +35,12 @@ import {
   Trash2,
   Edit2,
   CheckCircle2,
-  XCircle,
   ExternalLink,
-  Github,
   Mail,
   Sparkles,
-  Phone,
-  GraduationCap,
   X,
   RefreshCw,
+  MessageSquare,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -58,6 +55,7 @@ type AdminTab =
   | 'projects'
   | 'news'
   | 'events'
+  | 'feedback'
   | 'settings'
   | 'admins';
 
@@ -65,7 +63,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onLogout,
   onViewPublicSite,
 }) => {
-  const { user, isPresident, adminRole } = useAuth();
+  const { user, isPresident } = useAuth();
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -77,8 +75,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [news, setNews] = useState<NewsPost[]>([]);
   const [events, setEvents] = useState<ClubEvent[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [feedbackItems, setFeedbackItems] = useState<{
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    message: string;
+    created_at: string;
+  }[]>([]);
   const [settings, setSettings] = useState<ClubSettings>(DEFAULT_CLUB_SETTINGS);
-  const [loading, setLoading] = useState(true);
 
   // Search & Filter States
   const [memberSearch, setMemberSearch] = useState('');
@@ -250,10 +254,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           }))
         );
       }
+
+      // Community Feedback Dispatches
+      try {
+        const { data: fbData } = await supabase
+          .from('site_feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (fbData) {
+          setFeedbackItems(fbData);
+        }
+      } catch (fbErr) {
+        console.warn('Feedback query notice:', fbErr);
+      }
     } catch (err) {
       console.warn('Error loading admin data from Supabase:', err);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleDeleteFeedback = async (id: string) => {
+    if (!window.confirm('Delete this feedback dispatch?')) return;
+    try {
+      const { error } = await supabase.from('site_feedback').delete().eq('id', id);
+      if (!error) {
+        setFeedbackItems((prev) => prev.filter((item) => item.id !== id));
+        toast.info('Feedback dispatch deleted.');
+      } else {
+        throw error;
+      }
+    } catch (err: any) {
+      toast.error('Failed to delete feedback: ' + err.message);
     }
   };
 
@@ -703,6 +733,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               { id: 'projects', label: `Projects Manager (${projects.length})`, icon: Layers },
               { id: 'news', label: `News & Updates (${news.length})`, icon: BookOpen },
               { id: 'events', label: `Events & Workshops (${events.length})`, icon: Calendar },
+              { id: 'feedback', label: `Feedback Dispatches (${feedbackItems.length})`, icon: MessageSquare, badge: feedbackItems.length },
               { id: 'settings', label: 'Club Settings & Branding', icon: Settings },
               { id: 'admins', label: 'Manage Admins (VP Role)', icon: ShieldAlert },
             ].map((item) => {
@@ -1022,7 +1053,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={memberBranchFilter}
                 onChange={(e) => setMemberBranchFilter(e.target.value)}
-                className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-hidden"
+                className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none"
               >
                 <option value="All">All Branches</option>
                 <option value="Computer Science & Engineering">CSE</option>
@@ -1034,7 +1065,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <select
                 value={memberYearFilter}
                 onChange={(e) => setMemberYearFilter(e.target.value)}
-                className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-hidden"
+                className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none"
               >
                 <option value="All">All Years</option>
                 <option value="1st Year">1st Year</option>
@@ -1353,6 +1384,93 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {/* ================================================================= */}
+        {/* COMMUNITY FEEDBACK DISPATCHES TAB */}
+        {/* ================================================================= */}
+        {activeTab === 'feedback' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Community Feedback & Dispatches</h1>
+                <p className="text-xs text-slate-500 mt-1">
+                  Inquiries, workshop topics, and research suggestions submitted by students and campus visitors.
+                </p>
+              </div>
+              <button
+                onClick={loadAllData}
+                className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer shadow-xs self-start"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh Dispatches</span>
+              </button>
+            </div>
+
+            {feedbackItems.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-xs max-w-lg mx-auto">
+                <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-800">No feedback dispatches yet</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  When students or visitors submit suggestions through the Community Feedback section, they will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {feedbackItems.map((fb) => (
+                  <div
+                    key={fb.id}
+                    className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                        <span className="font-semibold text-purple-700">
+                          {fb.name || 'Anonymous Contributor'}
+                        </span>
+                        <span>
+                          {new Date(fb.created_at).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+
+                      {fb.email && (
+                        <div className="text-xs text-slate-500 mb-3 flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-slate-400" />
+                          <a href={`mailto:${fb.email}`} className="text-purple-600 hover:underline">
+                            {fb.email}
+                          </a>
+                        </div>
+                      )}
+
+                      <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        {fb.message}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-slate-400 uppercase">
+                        Verified Dispatch
+                      </span>
+                      <button
+                        onClick={() => handleDeleteFeedback(fb.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Dispatch"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================================================================= */}
         {/* 7. CLUB SETTINGS TAB */}
         {/* ================================================================= */}
         {activeTab === 'settings' && (
@@ -1374,7 +1492,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={settings.clubName}
                     onChange={(e) => setSettings({ ...settings, clubName: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
@@ -1386,7 +1504,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={settings.collegeName}
                     onChange={(e) => setSettings({ ...settings, collegeName: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1399,7 +1517,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="email"
                   value={settings.contactEmail}
                   onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1411,7 +1529,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   rows={2}
                   value={settings.tagline}
                   onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1424,7 +1542,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={settings.githubUrl || ''}
                     onChange={(e) => setSettings({ ...settings, githubUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
@@ -1436,7 +1554,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={settings.linkedinUrl || ''}
                     onChange={(e) => setSettings({ ...settings, linkedinUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
@@ -1448,7 +1566,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={settings.instagramUrl || ''}
                     onChange={(e) => setSettings({ ...settings, instagramUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1555,7 +1673,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         placeholder="vp.student@niat.edu"
                         value={newVpEmail}
                         onChange={(e) => setNewVpEmail(e.target.value)}
-                        className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                        className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                       />
                     </div>
 
@@ -1569,7 +1687,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         placeholder="Get UID from Members list or Firebase"
                         value={newVpUid}
                         onChange={(e) => setNewVpUid(e.target.value)}
-                        className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden font-mono"
+                        className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none font-mono"
                       />
                     </div>
                   </div>
@@ -1720,7 +1838,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingProject.title}
                   onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1731,7 +1849,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={editingProject.category}
                     onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1739,7 +1857,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <select
                     value={editingProject.status}
                     onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value as ProjectStatus })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-hidden"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none"
                   >
                     <option value="Ongoing">Ongoing</option>
                     <option value="Completed">Completed</option>
@@ -1755,7 +1873,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingProject.description}
                   onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1767,7 +1885,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   placeholder="e.g. PyTorch, LangChain, React, vLLM"
                   value={editingProject.techStack}
                   onChange={(e) => setEditingProject({ ...editingProject, techStack: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden font-mono"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none font-mono"
                 />
               </div>
 
@@ -1778,7 +1896,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   placeholder="e.g. Priya Sharma, Rohit Verma"
                   value={editingProject.teamMembers}
                   onChange={(e) => setEditingProject({ ...editingProject, teamMembers: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1789,7 +1907,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={editingProject.githubUrl || ''}
                     onChange={(e) => setEditingProject({ ...editingProject, githubUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1798,7 +1916,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={editingProject.demoUrl || ''}
                     onChange={(e) => setEditingProject({ ...editingProject, demoUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1853,7 +1971,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingNews.title}
                   onChange={(e) => setEditingNews({ ...editingNews, title: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1864,7 +1982,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={editingNews.category}
                     onChange={(e) => setEditingNews({ ...editingNews, category: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1873,7 +1991,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={editingNews.author}
                     onChange={(e) => setEditingNews({ ...editingNews, author: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1885,7 +2003,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingNews.summary}
                   onChange={(e) => setEditingNews({ ...editingNews, summary: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1896,7 +2014,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingNews.content}
                   onChange={(e) => setEditingNews({ ...editingNews, content: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1950,7 +2068,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingEvent.title}
                   onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1963,7 +2081,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     placeholder="e.g. Nov 20, 2026"
                     value={editingEvent.date}
                     onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1973,7 +2091,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     placeholder="e.g. 3:00 PM - 5:00 PM"
                     value={editingEvent.time}
                     onChange={(e) => setEditingEvent({ ...editingEvent, time: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -1986,7 +2104,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   placeholder="e.g. Tech Block Room 402 or Google Meet"
                   value={editingEvent.venue}
                   onChange={(e) => setEditingEvent({ ...editingEvent, venue: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -1996,7 +2114,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   rows={3}
                   value={editingEvent.description}
                   onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -2007,7 +2125,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="url"
                     value={editingEvent.rsvpUrl || ''}
                     onChange={(e) => setEditingEvent({ ...editingEvent, rsvpUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -2071,7 +2189,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   required
                   value={editingMember.fullName}
                   onChange={(e) => setEditingMember({ ...editingMember, fullName: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 
@@ -2083,7 +2201,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     required
                     value={editingMember.rollNumber}
                     onChange={(e) => setEditingMember({ ...editingMember, rollNumber: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden font-mono"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none font-mono"
                   />
                 </div>
                 <div>
@@ -2092,7 +2210,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="tel"
                     value={editingMember.phone}
                     onChange={(e) => setEditingMember({ ...editingMember, phone: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -2104,7 +2222,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={editingMember.branch}
                     onChange={(e) => setEditingMember({ ...editingMember, branch: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -2113,7 +2231,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     type="text"
                     value={editingMember.year}
                     onChange={(e) => setEditingMember({ ...editingMember, year: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -2124,7 +2242,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="text"
                   value={editingMember.skills}
                   onChange={(e) => setEditingMember({ ...editingMember, skills: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-hidden"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-purple-600 focus:outline-none"
                 />
               </div>
 

@@ -8,7 +8,7 @@ import { Project, NewsPost, ClubEvent, ClubSettings } from '../types';
 
 export const DEFAULT_CLUB_SETTINGS: ClubSettings = {
   clubName: 'Gen AI Club',
-  collegeName: 'NIAT SANSKIRITI',
+  collegeName: 'NIAT SANSKRITI',
   contactEmail: 'genai.club@niatsanskriti.edu',
   tagline: 'Empowering students to pioneer neural architectures, generative models, and autonomous AI systems.',
   instagramUrl: 'https://instagram.com',
@@ -65,9 +65,9 @@ export const SAMPLE_PROJECTS: Omit<Project, 'id'>[] = [
 
 export const SAMPLE_NEWS: Omit<NewsPost, 'id'>[] = [
   {
-    title: 'Official Launch of Gen AI Club at NIAT SANSKIRITI',
+    title: 'Official Launch of Gen AI Club at NIAT SANSKRITI',
     summary: 'The Department of Computer Science & Engineering inaugurates the flagship Generative AI Student Research Club.',
-    content: 'We are thrilled to inaugurate the Gen AI Club at NIAT SANSKIRITI. Designed as a hands-on collaborative ecosystem, the club bridges academic rigor and industry-grade AI development. Members will gain direct access to GPU computing clusters, mentorship from AI research scientists, and weekly project hackathons.',
+    content: 'We are thrilled to inaugurate the Gen AI Club at NIAT SANSKRITI. Designed as a hands-on collaborative ecosystem, the club bridges academic rigor and industry-grade AI development. Members will gain direct access to GPU computing clusters, mentorship from AI research scientists, and weekly project hackathons.',
     category: 'Club Announcement',
     author: 'Club Executive Council',
     publishedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
@@ -87,7 +87,7 @@ export const SAMPLE_EVENTS: Omit<ClubEvent, 'id'>[] = [
     title: 'Hands-on Agentic Workflows & Multi-Modal AI Jam',
     date: 'November 15, 2026',
     time: '2:00 PM - 5:30 PM',
-    venue: 'NIAT SANSKIRITI Innovation Hub, Room 402',
+    venue: 'NIAT SANSKRITI Innovation Hub, Room 402',
     description: 'Deep dive into autonomous reasoning, tool-calling agents, and real-time multimodal streaming. Bring your laptops with Python 3.11+ installed.',
     rsvpUrl: 'https://forms.example.com',
     status: 'Upcoming',

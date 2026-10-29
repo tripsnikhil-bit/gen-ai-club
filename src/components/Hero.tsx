@@ -16,7 +16,7 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({
   onOpenJoin,
   onExploreProjects,
-  collegeName = 'NIAT SANSKIRITI',
+  collegeName = 'NIAT SANSKRITI',
 }) => {
   return (
     <section className="relative overflow-hidden pt-28 pb-32 md:pt-36 md:pb-44 bg-black">
@@ -58,14 +58,16 @@ export const Hero: React.FC<HeroProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-[-0.035em] leading-[1.06] mb-8" 
+            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.035em] leading-[1.06] mb-8" 
             style={{ textWrap: 'balance' }}
           >
-            Advancing the Frontier of{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-100 to-zinc-400">
+              Advancing the Frontier of
+            </span>{' '}
             <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
               Generative
             </span>{' '}
-            <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
+            <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">
               Intelligence.
             </span>
           </motion.h1>
@@ -81,7 +83,7 @@ export const Hero: React.FC<HeroProps> = ({
             autonomous agents, multimodal architectures, and production-grade AI systems.
           </motion.p>
 
-          {/* Action CTAs - Sleek minimalist 1px glowing border button (Requirement 3) */}
+          {/* Action CTAs - Sleek minimalist 1px glowing border button */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,7 +92,7 @@ export const Hero: React.FC<HeroProps> = ({
           >
             <button
               onClick={onOpenJoin}
-              className="w-full sm:w-auto px-7 py-3.5 text-sm font-medium text-white linear-btn-glow rounded-xl flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-7 py-3.5 text-sm font-medium text-white linear-btn-glow hover-glow rounded-xl flex items-center justify-center gap-2 group cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
               <span>Apply for Membership</span>
@@ -99,9 +101,9 @@ export const Hero: React.FC<HeroProps> = ({
 
             <button
               onClick={onExploreProjects}
-              className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-zinc-400 hover:text-white bg-transparent hover:bg-white/[0.03] border border-transparent hover:border-white/10 rounded-xl transition-all duration-300 ease-out flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-zinc-400 hover:text-white bg-transparent hover:bg-white/[0.04] border border-white/10 hover:border-white/20 hover-glow-subtle rounded-xl transition-all duration-300 ease-out flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Code className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400" />
+              <Code className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
               <span>Explore Active Projects</span>
             </button>
           </motion.div>

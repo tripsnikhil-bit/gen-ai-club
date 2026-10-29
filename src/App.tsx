@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { Navbar } from './components/Navbar';
@@ -13,6 +13,7 @@ import { ProjectsSection } from './components/ProjectsSection';
 import { Leaderboard } from './components/Leaderboard';
 import { NewsSection } from './components/NewsSection';
 import { EventsSection } from './components/EventsSection';
+import { FeedbackSection } from './components/FeedbackSection';
 import { Footer } from './components/Footer';
 import { JoinModal } from './components/JoinModal';
 import { StudentAuthModal } from './components/StudentAuthModal';
@@ -26,7 +27,7 @@ import { DEFAULT_CLUB_SETTINGS } from './lib/starterData';
 import { Sparkles } from 'lucide-react';
 
 function AppContent() {
-  const { user, isAdmin, isApprovedMember, loading, logout } = useAuth();
+  const { isAdmin, isApprovedMember, loading, logout } = useAuth();
   const toast = useToast();
 
   const [currentView, setCurrentView] = useState<'landing' | 'student-dashboard' | 'admin-dashboard'>('landing');
@@ -94,8 +95,21 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-zinc-100">
+    <div className="min-h-screen flex flex-col bg-black text-zinc-100 relative selection:bg-cyan-500/20 selection:text-cyan-200">
       
+      {/* Global Animated Ambient Background Glow (Apple / OpenAI tier subtle living canvas) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div 
+          className="absolute -top-[15%] left-1/4 w-[750px] h-[750px] rounded-full bg-cyan-500/10 filter blur-[130px] animate-ambient-mesh-1"
+        />
+        <div 
+          className="absolute top-[45%] -right-[10%] w-[700px] h-[700px] rounded-full bg-indigo-500/10 filter blur-[140px] animate-ambient-mesh-2"
+        />
+        <div 
+          className="absolute bottom-[10%] left-[5%] w-[650px] h-[650px] rounded-full bg-sky-500/08 filter blur-[150px] animate-ambient-mesh-1"
+        />
+      </div>
+
       {/* Top Navbar */}
       {currentView !== 'admin-dashboard' && (
         <Navbar
@@ -108,7 +122,7 @@ function AppContent() {
       )}
 
       {/* Main Routed View */}
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         {currentView === 'landing' && (
           <>
             <Hero
@@ -124,6 +138,7 @@ function AppContent() {
             <Leaderboard />
             <NewsSection />
             <EventsSection />
+            <FeedbackSection />
           </>
         )}
 

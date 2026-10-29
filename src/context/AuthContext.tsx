@@ -6,7 +6,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { AdminRole, JoinRequest, Member, UserProfile } from '../types';
+import { AdminRole, JoinRequest, Member } from '../types';
 
 export const DEFAULT_PRESIDENT_EMAIL = 'tripsnikhil@gmail.com';
 
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let memberData: Member | null = null;
 
       try {
-        const { data: profile, error: profileErr } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', currentUser.id)
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             branch: 'Computer Science & Engineering',
             year: 'Council',
             skills: 'Generative AI, Large Language Models, System Architecture',
-            bio: 'Founding President of Gen AI Club NIAT SANSKIRITI.',
+            bio: 'Founding President of Gen AI Club NIAT SANSKRITI.',
             role: 'president',
             status: 'approved',
             joinedAt: new Date().toISOString(),
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               branch: 'Computer Science & Engineering',
               year: 'Council',
               skills: 'Generative AI, Large Language Models, System Architecture',
-              bio: 'Founding President of Gen AI Club NIAT SANSKIRITI.',
+              bio: 'Founding President of Gen AI Club NIAT SANSKRITI.',
               updated_at: new Date().toISOString(),
             });
           } catch (upsertErr) {
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // 2. Check 'join_requests' table for student application status
       try {
-        const { data: request, error: reqErr } = await supabase
+        const { data: request } = await supabase
           .from('join_requests')
           .select('*')
           .or(`id.eq.${currentUser.id},email.eq.${email}`)
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen to Supabase auth state change events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
+      async (_event: AuthChangeEvent, session: Session | null) => {
         if (!mounted) return;
         const currentUser = session?.user || null;
         setUser(currentUser);

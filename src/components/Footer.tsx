@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenSetupGuide,
 }) => {
   const clubName = settings?.clubName || 'GEN AI CLUB';
-  const collegeName = settings?.collegeName || 'NIAT SANSKIRITI';
+  const collegeName = settings?.collegeName || 'NIAT SANSKRITI';
   const contactEmail = settings?.contactEmail || 'genai.club@niatsanskriti.edu';
 
   return (
@@ -105,6 +105,11 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <a href="#events" className="hover:text-white transition-colors duration-200">
                   Workshops & Events
+                </a>
+              </li>
+              <li>
+                <a href="#feedback" className="hover:text-white transition-colors duration-200">
+                  Community Feedback
                 </a>
               </li>
             </ul>

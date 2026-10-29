@@ -18,139 +18,100 @@ interface StudentLeader {
   rank: number;
 }
 
-const BENCHMARK_LEADERS: Omit<StudentLeader, 'rank'>[] = [
-  {
-    id: 'lead-1',
-    fullName: 'Devansh Verma',
-    email: 'devansh.v@niatsanskriti.edu',
-    branch: 'Computer Science (AI & ML)',
-    projectCount: 7,
-    githubUrl: 'https://github.com',
-    topTech: 'PyTorch · Transformers · CUDA',
-  },
-  {
-    id: 'lead-2',
-    fullName: 'Ananya Deshmukh',
-    email: 'ananya.d@niatsanskriti.edu',
-    branch: 'AI & Data Science',
-    projectCount: 5,
-    githubUrl: 'https://github.com',
-    topTech: 'LangChain · RAG · FastAPI',
-  },
-  {
-    id: 'lead-3',
-    fullName: 'Rohan Kulkarni',
-    email: 'rohan.k@niatsanskriti.edu',
-    branch: 'Information Technology',
-    projectCount: 4,
-    githubUrl: 'https://github.com',
-    topTech: 'Diffusers · OpenCV · ONNX',
-  },
-  {
-    id: 'lead-4',
-    fullName: 'Priya Iyer',
-    email: 'priya.i@niatsanskriti.edu',
-    branch: 'CSE',
-    projectCount: 3,
-    githubUrl: 'https://github.com',
-    topTech: 'vLLM · HuggingFace',
-  },
-  {
-    id: 'lead-5',
-    fullName: 'Aditya Sen',
-    email: 'aditya.s@niatsanskriti.edu',
-    branch: 'Electronics & Communication',
-    projectCount: 3,
-    githubUrl: 'https://github.com',
-    topTech: 'TensorRT · Embedded AI',
-  },
-  {
-    id: 'lead-6',
-    fullName: 'Sneha Rao',
-    email: 'sneha.r@niatsanskriti.edu',
-    branch: 'AI & Data Science',
-    projectCount: 2,
-    githubUrl: 'https://github.com',
-    topTech: 'LlamaIndex · React',
-  },
-];
-
 export const Leaderboard: React.FC = () => {
   const [leaders, setLeaders] = useState<StudentLeader[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     async function fetchLeaderboard() {
       try {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, full_name, email, branch, github_url, role')
-          .eq('role', 'student')
-          .limit(20);
+          .select('id, full_name, email, branch, github_url, skills, role, created_at')
+          .eq('role', 'student');
+
+        if (!mounted) return;
 
         if (!error && profiles && profiles.length > 0) {
-          let projectCounts: Record<string, number> = {};
+          const projectCounts: Record<string, number> = {};
           try {
             const { data: projects } = await supabase.from('projects').select('team_members, title');
-            if (projects) {
+            if (projects && mounted) {
               profiles.forEach((p) => {
                 const count = projects.filter(
                   (proj) =>
                     proj.team_members &&
-                    (proj.team_members.toLowerCase().includes(p.full_name?.toLowerCase() || '---') ||
-                      proj.team_members.toLowerCase().includes(p.email?.toLowerCase() || '---'))
+                    ((p.full_name && proj.team_members.toLowerCase().includes(p.full_name.toLowerCase())) ||
+                      (p.email && proj.team_members.toLowerCase().includes(p.email.toLowerCase())))
                 ).length;
                 projectCounts[p.id] = count;
               });
             }
           } catch (pErr) {
-            console.warn('Projects count note:', pErr);
+            console.warn('Projects count query notice:', pErr);
           }
 
-          const merged: StudentLeader[] = profiles.map((p, idx) => {
-            const fallbackCount = Math.max(1, (7 - idx) % 8);
-            const actualCount = (projectCounts[p.id] && projectCounts[p.id] > 0)
-              ? projectCounts[p.id]
-              : fallbackCount;
+          if (!mounted) return;
+
+          const mapped: StudentLeader[] = profiles.map((p) => {
+            const calculatedCount = projectCounts[p.id] ?? 0;
 
             return {
               id: p.id,
-              fullName: p.full_name || 'Club Student Member',
-              email: p.email || 'student@niat.edu',
+              fullName: p.full_name || 'Student Builder',
+              email: p.email || '',
               branch: p.branch || 'Computer Science',
-              projectCount: actualCount,
-              githubUrl: p.github_url || 'https://github.com',
-              topTech: 'PyTorch · LangChain · LLMs',
+              projectCount: calculatedCount,
+              githubUrl: p.github_url || '',
+              topTech: p.skills || 'AI · Generative Models',
               rank: 0,
             };
           });
 
-          merged.sort((a, b) => b.projectCount - a.projectCount);
-          merged.forEach((item, index) => {
+          // Sort by project count descending, then by name ascending
+          mapped.sort((a, b) => {
+            if (b.projectCount !== a.projectCount) {
+              return b.projectCount - a.projectCount;
+            }
+            return a.fullName.localeCompare(b.fullName);
+          });
+
+          mapped.forEach((item, index) => {
             item.rank = index + 1;
           });
 
-          setLeaders(merged);
+          setLeaders(mapped);
         } else {
-          const formatted = BENCHMARK_LEADERS.map((b, idx) => ({
-            ...b,
-            rank: idx + 1,
-          }));
-          setLeaders(formatted);
+          setLeaders([]);
         }
       } catch (err) {
-        console.warn('Leaderboard load note:', err);
-        const formatted = BENCHMARK_LEADERS.map((b, idx) => ({
-          ...b,
-          rank: idx + 1,
-        }));
-        setLeaders(formatted);
+        console.warn('Leaderboard fetch notice:', err);
+        if (mounted) setLeaders([]);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
 
     fetchLeaderboard();
+
+    // Real-time Supabase subscription to stream profile updates and additions live
+    const channel = supabase
+      .channel('public:profiles')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => {
+          if (mounted) fetchLeaderboard();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const topThree = leaders.slice(0, 3);
@@ -183,29 +144,37 @@ export const Leaderboard: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#06b6d4]" />
             <span>Builder Leaderboard</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-[-0.03em] leading-tight">
-            Research & Build{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
-              Rankings.
-            </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-zinc-400">
+            Research & Build Rankings.
           </h2>
-          <p className="text-zinc-400 text-base mt-4 max-w-xl mx-auto leading-relaxed">
+          <p className="text-zinc-400 text-sm sm:text-base mt-4 max-w-xl mx-auto leading-relaxed">
             Recognizing club researchers driving state-of-the-art models, publishing papers, and deploying campus tools.
           </p>
         </div>
 
-        {/* Podium: Top 3 Students */}
+        {/* Podium: Top 3 Students / Loading Skeletons / Dynamic Fallback */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-64 rounded-2xl linear-card animate-pulse" />
             ))}
           </div>
+        ) : leaders.length === 0 ? (
+          /* Dynamic Data Fallback: database is empty */
+          <div className="text-center py-20 px-6 rounded-2xl linear-card border border-white/10 max-w-xl mx-auto shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] mb-16">
+            <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-cyan-400 mx-auto mb-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white tracking-tight">Check back soon for updates</h3>
+            <p className="text-xs text-zinc-400 mt-2 max-w-md mx-auto leading-relaxed">
+              Student research rankings will populate here in real-time as club members register and collaborate on projects.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-end mb-16">
             
             {/* Rank 2: Silver Podium */}
-            {second && (
+            {second ? (
               <div className="order-2 md:order-1 relative rounded-2xl linear-card linear-card-hover p-6 flex flex-col justify-between border-t-2 border-t-zinc-400/70 group">
                 <div className="flex items-center justify-between mb-5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] text-zinc-300 text-[11px] font-mono border border-white/10">
@@ -240,6 +209,8 @@ export const Leaderboard: React.FC = () => {
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="hidden md:block order-2 md:order-1" />
             )}
 
             {/* Rank 1: Gold Podium (Linear centerpiece with electric amber accent beam) */}
@@ -281,7 +252,7 @@ export const Leaderboard: React.FC = () => {
             )}
 
             {/* Rank 3: Bronze Podium */}
-            {third && (
+            {third ? (
               <div className="order-3 relative rounded-2xl linear-card linear-card-hover p-6 flex flex-col justify-between border-t-2 border-t-amber-700/70 group">
                 <div className="flex items-center justify-between mb-5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] text-zinc-300 text-[11px] font-mono border border-white/10">
@@ -316,6 +287,8 @@ export const Leaderboard: React.FC = () => {
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="hidden md:block order-3" />
             )}
 
           </div>

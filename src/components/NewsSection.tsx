@@ -14,6 +14,8 @@ export const NewsSection: React.FC = () => {
   const [activeArticle, setActiveArticle] = useState<NewsPost | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadNews() {
       try {
         const { data, error } = await supabase
@@ -21,7 +23,7 @@ export const NewsSection: React.FC = () => {
           .select('*')
           .order('published_at', { ascending: false });
 
-        if (!error && data) {
+        if (mounted && !error && data) {
           const loaded: NewsPost[] = data.map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -36,10 +38,27 @@ export const NewsSection: React.FC = () => {
       } catch (err) {
         console.warn('News Supabase query notice:', err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
     loadNews();
+
+    // Real-time Supabase subscription to stream news announcements live
+    const channel = supabase
+      .channel('public:news')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'news' },
+        () => {
+          if (mounted) loadNews();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
@@ -52,7 +71,7 @@ export const NewsSection: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
             <span>Dispatches & Publications</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-[-0.03em] leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-zinc-400">
             Latest Research Updates.
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 mt-3">

@@ -82,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80 shadow-[0_0_6px_#06b6d4]" />
             </div>
             <span className="text-[9px] font-mono font-medium text-zinc-500 tracking-wider uppercase mt-0.5">
-              NIAT SANSKIRITI
+              NIAT SANSKRITI
             </span>
           </div>
         </div>
@@ -119,6 +119,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="hover:text-white transition-colors duration-200 whitespace-nowrap shrink-0 cursor-pointer"
           >
             Events
+          </button>
+          <button
+            onClick={() => handleNavClick('feedback')}
+            className="hover:text-white transition-colors duration-200 whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            Feedback
           </button>
         </nav>
 
@@ -240,6 +246,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="text-left py-2.5 px-2 text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.03] rounded-lg transition-colors cursor-pointer"
           >
             Events
+          </button>
+          <button
+            onClick={() => handleNavClick('feedback')}
+            className="text-left py-2.5 px-2 text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.03] rounded-lg transition-colors cursor-pointer"
+          >
+            Feedback
           </button>
 
           <div className="pt-3 border-t border-white/[0.08] flex flex-col gap-2">

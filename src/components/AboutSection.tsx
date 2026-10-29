@@ -11,7 +11,7 @@ interface AboutSectionProps {
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({
-  collegeName = 'NIAT SANSKIRITI',
+  collegeName = 'NIAT SANSKRITI',
 }) => {
   return (
     <section id="about" className="py-32 border-t border-white/[0.08] bg-black relative">
@@ -23,7 +23,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
             <span>Club Charter</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-[-0.03em] leading-tight mb-5">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] leading-tight mb-5 text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-zinc-400">
             Engineering Production AI Systems on Campus.
           </h2>
           <p className="text-base sm:text-lg text-zinc-400 leading-relaxed font-normal">

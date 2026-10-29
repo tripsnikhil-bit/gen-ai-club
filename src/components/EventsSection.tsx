@@ -13,6 +13,8 @@ export const EventsSection: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadEvents() {
       try {
         const { data, error } = await supabase
@@ -20,7 +22,7 @@ export const EventsSection: React.FC = () => {
           .select('*')
           .order('date', { ascending: true });
 
-        if (!error && data) {
+        if (mounted && !error && data) {
           const loaded: ClubEvent[] = data.map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -36,10 +38,27 @@ export const EventsSection: React.FC = () => {
       } catch (err) {
         console.warn('Events Supabase query notice:', err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
     loadEvents();
+
+    // Real-time Supabase subscription to stream event updates live
+    const channel = supabase
+      .channel('public:events')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'events' },
+        () => {
+          if (mounted) loadEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
@@ -52,7 +71,7 @@ export const EventsSection: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
             <span>Gatherings & Hackathons</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-[-0.03em] leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-zinc-400">
             Upcoming Workshops.
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 mt-3">

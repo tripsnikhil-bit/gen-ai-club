@@ -270,7 +270,7 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
                       placeholder="student@niat.edu"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-hidden focus:ring-1 focus:ring-cyan-400/20 transition-all"
+                      className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
                     />
                   </div>
                 </div>
@@ -329,7 +329,7 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
                     placeholder="student@niat.edu"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-hidden focus:ring-1 focus:ring-cyan-400/20 transition-all"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
                   />
                 </div>
               </div>
@@ -356,7 +356,7 @@ export const StudentAuthModal: React.FC<StudentAuthModalProps> = ({
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-hidden focus:ring-1 focus:ring-cyan-400/20 transition-all"
+                    className="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-500 focus:border-cyan-400/80 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
                   />
                   <button
                     type="button"

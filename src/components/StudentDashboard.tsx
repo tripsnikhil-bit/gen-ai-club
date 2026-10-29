@@ -223,7 +223,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) 
                       placeholder="e.g. Working on retrieval-augmented generation and reasoning agents..."
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-hidden"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-none"
                     />
                   </div>
 
@@ -236,7 +236,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) 
                       placeholder="e.g. PyTorch, LangChain, React, FastAPI"
                       value={skills}
                       onChange={(e) => setSkills(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-hidden"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-none"
                     />
                   </div>
 
@@ -250,7 +250,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) 
                         placeholder="https://github.com/username"
                         value={githubUrl}
                         onChange={(e) => setGithubUrl(e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-hidden"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-none"
                       />
                     </div>
 
@@ -263,7 +263,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) 
                         placeholder="https://linkedin.com/in/username"
                         value={linkedinUrl}
                         onChange={(e) => setLinkedinUrl(e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-hidden"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white focus:border-cyan-400/80 focus:outline-none"
                       />
                     </div>
                   </div>

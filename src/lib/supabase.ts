@@ -174,6 +174,19 @@ values ('club', 'Gen AI Club', 'NIAT SANSKRITI', 'tripsnikhil@gmail.com', 'Pione
 on conflict (id) do nothing;
 
 -- ------------------------------------------------------------------------
+-- 7. SITE FEEDBACK TABLE (User Inquiries & Club Suggestions)
+-- ------------------------------------------------------------------------
+create table if not exists public.site_feedback (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  email text,
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_site_feedback_created_at on public.site_feedback(created_at desc);
+
+-- ------------------------------------------------------------------------
 -- SECURITY DEFINER HELPER: Check if Current User is Executive
 -- ------------------------------------------------------------------------
 create or replace function public.is_executive()
@@ -207,6 +220,7 @@ alter table public.projects enable row level security;
 alter table public.news enable row level security;
 alter table public.events enable row level security;
 alter table public.settings enable row level security;
+alter table public.site_feedback enable row level security;
 
 -- ---------------- PROFILES POLICIES ----------------
 drop policy if exists "profiles_select_all" on public.profiles;
@@ -346,6 +360,26 @@ create policy "settings_select_public"
 
 create policy "settings_all_executive"
   on public.settings for all
+  using (public.is_executive());
+
+-- ---------------- SITE FEEDBACK POLICIES ----------------
+drop policy if exists "site_feedback_insert_public" on public.site_feedback;
+drop policy if exists "site_feedback_select_executive" on public.site_feedback;
+drop policy if exists "site_feedback_delete_executive" on public.site_feedback;
+
+-- Anyone can submit feedback (including non-logged in students and guests)
+create policy "site_feedback_insert_public"
+  on public.site_feedback for insert
+  with check (true);
+
+-- ONLY authenticated executives can view/read submitted feedback
+create policy "site_feedback_select_executive"
+  on public.site_feedback for select
+  using (public.is_executive());
+
+-- ONLY executives can delete feedback
+create policy "site_feedback_delete_executive"
+  on public.site_feedback for delete
   using (public.is_executive());
 
 -- ------------------------------------------------------------------------
