@@ -35,20 +35,24 @@ export const FeedbackSection: React.FC = () => {
       const { error } = await supabase.from('site_feedback').insert([payload]);
 
       if (error) {
-        // If the table does not exist yet in Supabase, show a helpful hint
-        if (error.message?.includes('does not exist') || error.code === '42P01') {
-          console.warn('site_feedback table pending in Supabase:', error);
-          // Graceful fallback for local/preview demonstrations
-          setSubmitted(true);
-        } else {
-          throw error;
-        }
-      } else {
-        setSubmitted(true);
+        console.error('Database Error in Community Dialogue insert:', error);
+        throw error;
       }
+
+      setSubmitted(true);
     } catch (err: any) {
-      console.error('Error submitting feedback:', err);
-      setErrorMessage(err.message || 'Unable to submit feedback. Please check your network and try again.');
+      // console.error the exact error object returned by the database/fetch call
+      console.error('Community Dialogue form submission error object:', err);
+      
+      const specificError =
+        err?.message ||
+        err?.error_description ||
+        err?.details ||
+        err?.hint ||
+        (typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err)) ||
+        'Unknown database error';
+      
+      setErrorMessage(specificError);
     } finally {
       setSubmitting(false);
     }
@@ -116,9 +120,12 @@ export const FeedbackSection: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               
               {errorMessage && (
-                <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/30 text-red-200 text-xs flex items-center gap-3">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span>{errorMessage}</span>
+                <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/30 text-red-200 text-xs flex items-start gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1 overflow-hidden">
+                    <p className="font-semibold text-red-300">Database Submission Error:</p>
+                    <p className="font-mono text-[11px] text-red-200 break-words whitespace-pre-wrap">{errorMessage}</p>
+                  </div>
                 </div>
               )}
 

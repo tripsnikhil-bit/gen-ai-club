@@ -6,10 +6,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Environment variables for Supabase - strictly using standard VITE_ env prefixes
-const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+const DEFAULT_URL = 'https://nskzrfcmhjyqfivnjiiw.supabase.co';
+const DEFAULT_KEY = 'sb_publishable_Btkg8kj2sfZAx_a-uozdOg_FGKS8_Ew';
+
+const envUrl = (import.meta.env.VITE_SUPABASE_URL || DEFAULT_URL).trim();
 
 // Ensure only public/publishable/anon keys are used in the browser, never a secret service-role key
-const rawAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+const rawAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_KEY).trim();
 const rawPubKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '').trim();
 
 // Pick the safe public publishable/anon key. If any key starts with sb_secret_, it is strictly excluded.
@@ -20,7 +23,7 @@ const resolveSafeKey = (): string => {
   if (rawAnonKey && !rawAnonKey.startsWith('sb_secret_') && !rawAnonKey.includes('placeholder')) {
     return rawAnonKey;
   }
-  return '';
+  return DEFAULT_KEY;
 };
 
 const envKey = resolveSafeKey();
@@ -35,9 +38,8 @@ export const isSupabaseConfigured = Boolean(
   (envUrl.startsWith('http://') || envUrl.startsWith('https://'))
 );
 
-// Fallback dummy credentials to prevent createClient URL parsing crash when keys are pending in fresh environments
-const validUrl = isSupabaseConfigured ? envUrl : 'https://placeholder-project.supabase.co';
-const validKey = isSupabaseConfigured ? envKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key';
+const validUrl = isSupabaseConfigured ? envUrl : DEFAULT_URL;
+const validKey = isSupabaseConfigured ? envKey : DEFAULT_KEY;
 
 export const supabase = createClient(validUrl, validKey, {
   auth: {
